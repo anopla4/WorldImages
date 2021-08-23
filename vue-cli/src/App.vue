@@ -6,7 +6,7 @@
       placeholder="Ingrese una palabra"
       id="searchInput"
     ></b-form-input>
-    <button @click="fetchData">Buscar</button>
+    <b-button class="btn" variant="primary" @click="fetchData">Buscar</b-button>
     <p>{{ word }}</p>
   </div>
 </template>
@@ -14,7 +14,20 @@
 <script>
 export default {
   data() {
-    return { word: undefined };
+    return {
+      word: undefined,
+      sellers: [{ name: "Pedro Sánchez" }, { name: "Diego Alfonso" }]
+    };
+  },
+  beforeMount() {
+    for (seller in this.sellers) {
+      this.$http
+        .post("https://api.alegra.com/api/v1/sellers", seller)
+        .then(response => {
+          const data = response.json();
+          console.log(data);
+        });
+    }
   },
 
   methods: {
@@ -44,5 +57,9 @@ export default {
 
 .container {
   margin: 5%;
+}
+
+.btn {
+  float: right;
 }
 </style>
