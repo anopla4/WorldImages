@@ -16,18 +16,25 @@ export default {
   data() {
     return {
       word: undefined,
-      sellers: [{ name: "Pedro Sánchez" }, { name: "Diego Alfonso" }]
+      sellers_id: [1, 2, 3, 4, 5],
+      sellers: []
     };
   },
   beforeMount() {
-    for (seller in this.sellers) {
+    this.sellers_id.forEach(id => {
       this.$http
-        .post("https://api.alegra.com/api/v1/sellers", seller)
+        .get(`https://api.alegra.com/api/v1/sellers/${id}`, {
+          headers: {
+            Authorization:
+              "Basic YW5vcGxhNEBnbWFpbC5jb206MWY4NmNjODMxNTc5ZGU0OGRiMWQ="
+          }
+        })
         .then(response => {
-          const data = response.json();
-          console.log(data);
-        });
-    }
+          return response.json();
+        })
+        .then(data => this.sellers.push(data));
+    });
+    console.log(this.sellers);
   },
 
   methods: {
