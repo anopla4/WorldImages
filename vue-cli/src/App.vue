@@ -14,13 +14,19 @@
               >Buscar</b-button
             ></b-col
           ></b-row
-        ><b-row
+        ><b-row v-if="bill_created"
           ><div
             v-for="seller in sellers"
             :key="seller.id"
             class="image"
             @click="update_points(seller.id)"
-          ></div></b-row></b-col
+          ></div
+        ></b-row>
+        <b-row v-else
+          ><p>Nombre del vendedor ganador: {{ this.bill["seller"]["name"] }}</p>
+          <p>Producto: {{ this.bill["items"][0]["name"] }}</p>
+          <p>Cantidad vendida: {{ this.bill["items"][0]["price"] }}</p></b-row
+        ></b-col
       ><b-col
         ><b-card
           class="mt-3"
@@ -45,6 +51,8 @@ export default {
   data() {
     return {
       word: undefined,
+      bill_created: true,
+      bill: undefined,
       sellers_id: [1, 2, 3, 4, 5],
       sellers: [],
       sellers_points: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
@@ -55,8 +63,7 @@ export default {
       this.$http
         .get(`https://api.alegra.com/api/v1/sellers/${id}`, {
           headers: {
-            Authorization:
-              "Basic YW5vcGxhNEBnbWFpbC5jb206MWY4NmNjODMxNTc5ZGU0OGRiMWQ="
+            Authorization: `Basic ${process.env.VUE_APP_CREDENTIALS}`
           }
         })
         .then(response => {
@@ -69,6 +76,36 @@ export default {
   methods: {
     update_points: function(id) {
       this.sellers_points[id] += 3;
+      if (this.sellers_points[id] >= 20) {
+        this.bill_created = false;
+        const sum = this.sellers.reduce((a, b) => a + b, 0);
+        const date = new Date();
+        const date_string = `${date.getFullYear()}-${date.getMonth() +
+          1}-${date.getDate()}`;
+        const bill = {
+          date: date_string,
+          dueDate: date_string,
+          client: process.env.VUE_APP_CLIENT,
+          seller: id,
+          items: [
+            {
+              id: process.env.VUE_APP_PRODUCT,
+              price: 3,
+              quantity: parseFloat(sum)
+            }
+          ]
+        };
+        this.$http
+          .post("https://api.alegra.com/api/v1/invoices", bill, {
+            headers: {
+              Authorization: `Basic ${process.env.VUE_APP_CREDENTIALS}`
+            }
+          })
+          .then(response => {
+            return response.json();
+          })
+          .then(data => (this.bill = data));
+      }
     },
     fetchData: function() {
       this.$http
