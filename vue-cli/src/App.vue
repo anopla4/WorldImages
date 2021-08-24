@@ -1,16 +1,26 @@
 <template>
   <div class="container">
     <b-row>
-      <b-col class="searchInput"
-        ><h5>Buscar palabra:</h5>
-        <b-form-input
-          v-model="word"
-          placeholder="Ingrese una palabra"
-          id="searchInput"
-        ></b-form-input>
-        <b-button class="btn" variant="primary" @click="fetchData"
-          >Buscar</b-button
-        ></b-col
+      <b-col class="searchInput">
+        <b-row>
+          <b-col
+            ><h5>Buscar palabra:</h5>
+            <b-form-input
+              v-model="word"
+              placeholder="Ingrese una palabra"
+              id="searchInput"
+            ></b-form-input>
+            <b-button class="btn" variant="primary" @click="fetchData"
+              >Buscar</b-button
+            ></b-col
+          ></b-row
+        ><b-row
+          ><div
+            v-for="seller in sellers"
+            :key="seller.id"
+            class="image"
+            @click="update_points(seller.id)"
+          ></div></b-row></b-col
       ><b-col
         ><b-card
           class="mt-3"
@@ -54,17 +64,17 @@ export default {
         })
         .then(data => this.sellers.push(data));
     });
-    console.log(this.sellers);
   },
 
   methods: {
-    get_image: function() {},
+    update_points: function(id) {
+      this.sellers_points[id] += 3;
+    },
     fetchData: function() {
       this.$http
         .get("https://serpapi.com/playground?q=Apple&tbm=isch&ijn=0")
         .then(response => {
-          const data = response.json();
-          console.log(data);
+          return response.json();
         });
     }
   }
@@ -89,5 +99,12 @@ searchInput {
 .btn {
   float: right;
   margin-top: 3%;
+}
+
+.image {
+  background-color: blue;
+  width: 50px;
+  height: 50px;
+  margin: 2%;
 }
 </style>
