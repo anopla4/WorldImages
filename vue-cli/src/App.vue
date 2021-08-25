@@ -14,14 +14,24 @@
               >Buscar</b-button
             ></b-col
           ></b-row
-        ><b-row v-if="bill_created"
-          ><div
-            v-for="seller in sellers"
-            :key="seller.id"
-            class="image"
-            @click="update_points(seller.id)"
-          ></div
-        ></b-row>
+        ><b-row v-if="bill_created">
+          <b-card-group deck>
+            <b-card
+              v-for="img in images"
+              :key="img.id"
+              @click="update_points(img.id.toString())"
+              v-bind:title="
+                'Vendedor: ' + sellers.find(t => t['id'] === img.id)['name']
+              "
+              v-bind:img-src="img.url"
+              img-alt="Image"
+              img-top
+              tag="article"
+              style="max-width: 15rem;"
+              class="mb-2"
+            ></b-card>
+          </b-card-group>
+        </b-row>
         <b-row v-else
           ><p>Nombre del vendedor ganador: {{ this.bill["seller"]["name"] }}</p>
           <p>Producto: {{ this.bill["items"][0]["name"] }}</p>
@@ -45,7 +55,6 @@
     >
   </div>
 </template>
-
 <script>
 export default {
   data() {
@@ -55,6 +64,9 @@ export default {
       bill: undefined,
       sellers_id: [1, 2, 3, 4, 5],
       sellers: [],
+      images: [],
+      first_element: 1,
+      next_images: [],
       sellers_points: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
     };
   },
@@ -76,6 +88,13 @@ export default {
   methods: {
     update_points: function(id) {
       this.sellers_points[id] += 3;
+      if (this.next_images.length !== 0) {
+        this.images = [...next_images];
+        this.next_images = [];
+      } else {
+        this.first_element += 10;
+        this.fetchData();
+      }
       if (this.sellers_points[id] >= 20) {
         this.bill_created = false;
         const sum = this.sellers.reduce((a, b) => a + b, 0);
@@ -108,10 +127,43 @@ export default {
       }
     },
     fetchData: function() {
-      this.$http
-        .get("https://serpapi.com/playground?q=Apple&tbm=isch&ijn=0")
-        .then(response => {
-          return response.json();
+      gapi.client.setApiKey("AIzaSyDFanaXHAyTj9KPXAlH5VpBRqEUB7PZTQk");
+      return gapi.client
+        .load(
+          "https://content.googleapis.com/discovery/v1/apis/customsearch/v1/rest"
+        )
+        .then(
+          () => {
+            console.log("GAPI client loaded for API");
+          },
+          err => {
+            console.error("Error loading GAPI client for API", err);
+          }
+        )
+        .then(() => {
+          return gapi.client.search.cse
+            .list({
+              cx: "6ce5fdff9abf5811f",
+              q: this.word,
+              searchType: "image",
+              start: this.first_element
+            })
+            .then(
+              function(response) {
+                return response["result"]["items"];
+              },
+              function(err) {
+                console.error("Execute error", err);
+              }
+            );
+        })
+        .then(img => {
+          this.images = img.slice(0, 5).map((item, index) => {
+            return { id: index + 1, url: item["link"] };
+          });
+          this.next_images = img.slice(5, 10).map((item, index) => {
+            return { id: index + 1, url: item["link"] };
+          });
         });
     }
   }
