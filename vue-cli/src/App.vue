@@ -92,7 +92,7 @@ export default {
       images: [],
       first_element: 0,
       next_images: [],
-      sellers_points: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+      sellers_points: { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 }
     };
   },
   beforeMount() {
@@ -128,7 +128,7 @@ export default {
           date: date_string,
           dueDate: date_string,
           client: 1,
-          seller: id,
+          seller: n_id.toString(),
           items: [
             {
               id: 1,
