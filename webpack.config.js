@@ -1,8 +1,6 @@
-const Dotenv = require("dotenv-webpack");
 var path = require("path");
 var webpack = require("webpack");
 module.exports = {
-  plugins: [new Dotenv()],
   entry: "./src/main.js",
   output: {
     path: path.resolve(__dirname, "./dist"),
